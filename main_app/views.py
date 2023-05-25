@@ -124,6 +124,35 @@ def add_to_watchlist(request):
         except Exception as e:
             return JsonResponse({"message": str(e)}, status=400)
 
+@csrf_exempt
+def remove_watchlist(request, ticker, userId):
+    if request.method == 'DELETE':
+        print(ticker)
+        print(userId)
+        try:
+            user = User.objects.get(id=userId)
+            user.watchlist.remove(ticker)
+            user.save()
+            return JsonResponse('good job removing it', safe=False)
+        except ObjectDoesNotExist:
+            return JsonResponse({'error': 'User not found'}, safe=False)
+
+def array_watchlist(request):
+    if request.method =='GET':
+        try:
+            user_id = request.GET.get('user_id')
+            user = User.objects.get(id=user_id)
+            watchlist = user.watchlist
+            watchlist_data = []
+            for ticker in watchlist:
+                ticker_data = soup_data(ticker)
+                watchlist_data.append({
+                    'ticker': ticker
+                })
+            return JsonResponse(watchlist_data, safe=False)
+        except Exception as e:
+            return JsonResponse({"message": str(e)}, status=400)
+
 def user_watchlist(request):
     if request.method == 'GET':
         try:
@@ -137,14 +166,13 @@ def user_watchlist(request):
                 ticker_data = soup_data(ticker)
                 watchlist_data.append({
                     'ticker': ticker,
-                    'name': ticker_data[0][0],
-                    'price': ticker_data[0][1],
                     'percentage': ticker_data[2]
                 })
 
             return JsonResponse(watchlist_data, safe=False)
         except Exception as e:
             return JsonResponse({"message": str(e)}, status=400)
+
 
 def get_user(request):
     if request.method == 'GET':

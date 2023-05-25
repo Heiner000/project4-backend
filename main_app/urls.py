@@ -22,6 +22,8 @@ urlpatterns = [
     path('user_all_shares/', views.user_all_shares, name='user_all_shares'),
     path('user_portfolio_values/', views.user_portfolio_values, name='user_portfolio_values'),
     path('users_and_stocks/', views.users_and_stocks, name='users_and_stocks'),
+    path('remove_watchlist/<str:ticker>/<str:userId>', views.remove_watchlist, name='remove_watchlist'),
+    path('array_watchlist/', views.array_watchlist, name='array_watchlist'),
 
     # Following and unfollowing users
     path('follow/', views.follow_user, name='follow_user'),
