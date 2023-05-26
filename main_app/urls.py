@@ -16,6 +16,7 @@ urlpatterns = [
     path('watchlist/', views.add_to_watchlist, name='add_to_watchlist'),
     path('get_watchlist/', views.user_watchlist, name='user_watchlist'),
     path('view_trades/', views.trade_history, name='trade_history'),
+    path('user_trade_history/', views.user_trade_history, name='user_trade_history'),
     path('user_info/', views.get_user, name='get_user'),
     path('user_shares/', views.user_shares, name='user_shares'),
     path('update_funds/', views.update_funds, name='update_funds'),
