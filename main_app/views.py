@@ -58,10 +58,24 @@ def search_asset(request, ticker):
 def trade_history(request):
     if request.method == 'GET':
         try:
-            stocks = Trade.objects.all().values()
-            return JsonResponse(list(stocks), safe=False)
+            # retrieve user_id from request
+            user_id = request.GET.get('user_id')
+            if not user_id:
+                raise KeyError("user_id not provided")
+            
+            # get the user
+            user = User.objects.get(id=user_id)
+
+            # get trades related to the user
+            trades = Trade.objects.filter(user=user).values()
+            
+            return JsonResponse(list(trades), safe=False)
+        except KeyError as e:
+            return JsonResponse({"message": str(e)}, status=400)
+        except User.DoesNotExist:
+            return JsonResponse({"message": "User not found"}, status=404)
         except Trade.DoesNotExist:
-            return JsonResponse({"message": "User stocks not found"}, status=404)
+            return JsonResponse({"message": "User trades not found"}, status=404)
 
 @csrf_exempt
 def trade_stock(request):
