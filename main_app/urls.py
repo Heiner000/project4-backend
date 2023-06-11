@@ -22,12 +22,12 @@ urlpatterns = [
     path('user_all_shares/', views.user_all_shares, name='user_all_shares'),
     path('user_portfolio_values/', views.user_portfolio_values, name='user_portfolio_values'),
     path('users_and_stocks/', views.users_and_stocks, name='users_and_stocks'),
-    path('remove_watchlist/<str:ticker>/<str:userId>', views.remove_watchlist, name='remove_watchlist'),
+    path('remove_watchlist/<str:ticker>/<str:userId>/', views.remove_watchlist, name='remove_watchlist'),
     path('array_watchlist/', views.array_watchlist, name='array_watchlist'),
 
     # Following and unfollowing users
-    path('follow/', views.follow_user, name='follow_user'),
-    path('unfollow/', views.unfollow_user, name='unfollow_user'),
+    path('follow/<int:user_id>/<int:followed_user_id>/', views.follow_user, name='follow_user'),
+    path('followers/<int:user_id>/', views.followers, name='followers'),
 
     # Assets
     path('assets/search/<str:ticker>/', views.search_asset, name='search_asset'),
