@@ -328,6 +328,7 @@ def user_portfolio_values(request):
             portfolio_value_list = []
             unrealized_change_percentage_list = []
             total_portfolio_value = Decimal(0)
+            total_cost_basis = Decimal(0)
 
             for ticker in tickers:
                 # filter trades for current ticker
@@ -360,24 +361,23 @@ def user_portfolio_values(request):
                     total_cost / buy_quantity if buy_quantity != 0 else Decimal(0)
                 )
 
+                # add total cost to total cost basis
+                total_cost_basis += total_cost
+
                 # get teh current price for the ticker
                 asset_info = soup_data(ticker)
                 current_price = Decimal(asset_info[0][1].replace(",", ""))
 
                 # calculate unrealized gain/loss percentage
                 unrealized_change = (
-                    round(
-                        ((current_price - avg_cost_per_share) / avg_cost_per_share)
-                        * 100,
-                        2,
-                    )
+                    round(((current_price - avg_cost_per_share) / avg_cost_per_share) * 100, 2,)
                     if avg_cost_per_share != 0
                     else Decimal(0)
                 )
                 unrealized_change_percentage_list.append(
                     {ticker: str(unrealized_change)}
                 )
-                print(unrealized_change_percentage_list)
+                # print(unrealized_change_percentage_list)
 
                 # calculate the total value for this ticker and append to portfolio list
                 total_value = current_price * total_shares_owned
@@ -387,12 +387,22 @@ def user_portfolio_values(request):
                 total_portfolio_value += total_value
                 # print('total port value: ', total_portfolio_value)
 
+                # calculate total portfolio gain/loss percentage
+                total_portfolio_gain = (
+                    (total_portfolio_value - total_cost_basis) / total_cost_basis * 100
+                    if total_cost_basis != 0
+                    else Decimal(0)
+                )
+
+                total_portfolio_gain_percentage = f"{total_portfolio_gain:.2f} %"
+
             # return the portfolio values list & total portfolio value
             return JsonResponse(
                 {
                     "portfolio_values": portfolio_value_list,
                     "total_portfolio_value": (f"{total_portfolio_value:,.2f}"),
                     "unrealized_change_percentage": unrealized_change_percentage_list,
+                    "total_portfolio_gain_percentage": str(total_portfolio_gain_percentage),
                 },
                 safe=False,
             )
@@ -436,7 +446,7 @@ def users_and_stocks(request):
 @csrf_exempt
 def follow_user(request, user_id, followed_user_id):
     print(f"Request method: {request.method}")
-    
+
     if request.method == "POST":
         try:
             user = User.objects.get(id=user_id)
@@ -460,7 +470,9 @@ def follow_user(request, user_id, followed_user_id):
 
             return JsonResponse({"message": "Unfollowed successfully"}, status=200)
         except Follower.DoesNotExist:
-            return JsonResponse({"error": "Follower relationship not found"}, status=404)
+            return JsonResponse(
+                {"error": "Follower relationship not found"}, status=404
+            )
         except User.DoesNotExist:
             return JsonResponse({"error": "User not found"}, status=404)
         except Exception as e:
